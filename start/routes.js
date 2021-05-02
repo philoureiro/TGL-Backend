@@ -11,7 +11,6 @@ Route.post('sessions', 'SessionController.store')
 Route.post('forgotpassword', 'ForgotPasswordController.store' )
 Route.put('forgotpassword', 'ForgotPasswordController.update' )
 
-
 //Rotas de game
 Route.post('games', 'GameController.store')
 Route.get('games/:id','GameController.show')
