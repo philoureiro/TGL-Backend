@@ -1,9 +1,13 @@
 "use strict";
 
 const Bet = use("App/Models/Bet");
+const Token = use("App/Models/Token");
 class BetController {
   async store({ request, response }) {
+    // const token = await Token.all();
+    // console.log(token);
     const data = request.only(["type", "price", "numbers_selecteds"]);
+    console.log(data);
     try {
       const bet = await Bet.create(data);
       return bet;
