@@ -46,7 +46,7 @@ class BetController {
         ? response.status(404).send({ message: "Não encontramos essa aposta." })
         : response
             .status(404)
-            .send({ message: "Algo deu errado ao atualizar a aposta." });
+            .send({ message: "Algo deu errado ao atualizar a aposta!" });
     }
   }
 
