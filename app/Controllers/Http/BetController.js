@@ -1,93 +1,71 @@
-'use strict'
+"use strict";
 
-/** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @typedef {import('@adonisjs/framework/src/Response')} Response */
-/** @typedef {import('@adonisjs/framework/src/View')} View */
-
-/**
- * Resourceful controller for interacting with bets
- */
+const Bet = use("App/Models/Bet");
 class BetController {
-  /**
-   * Show a list of all bets.
-   * GET bets
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async index ({ request, response, view }) {
+  async store({ request, response }) {
+    const data = request.only(["type", "price", "numbers_selecteds"]);
+    try {
+      const bet = await Bet.create(data);
+      return bet;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  /**
-   * Render a form to be used for creating a new bet.
-   * GET bets/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async index() {
+    const data = Bet.all();
+    return data;
   }
 
-  /**
-   * Create/save a new bet.
-   * POST bets
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async store ({ request, response }) {
+  async show({ params }) {
+    try {
+      const { id } = params;
+      const bet = Bet.findOrFail(id);
+      return bet;
+    } catch (error) {
+      return error.message.includes("Cannot find database")
+        ? response.status(404).send({ message: "Não encontramos essa aposta." })
+        : response
+            .status(404)
+            .send({ message: "Algo deu errado ao deletar a aposta." });
+    }
   }
 
-  /**
-   * Display a single bet.
-   * GET bets/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async show ({ params, request, response, view }) {
+  async update({ params, request, response }) {
+    const { id } = params;
+    try {
+      const data = request.only(["type", "price", "numbers_selecteds"]);
+      const bet = await Bet.findOrFail(id);
+      bet.merge(data);
+      bet.save();
+      console.log(data, id);
+      return bet;
+    } catch (error) {
+      console.log(error);
+      return error.message.includes("Cannot find database")
+        ? response.status(404).send({ message: "Não encontramos essa aposta." })
+        : response
+            .status(404)
+            .send({ message: "Algo deu errado ao atualizar a aposta." });
+    }
   }
 
-  /**
-   * Render a form to update an existing bet.
-   * GET bets/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
-  }
+  async destroy({ params, response }) {
+    const { id } = params;
 
-  /**
-   * Update bet details.
-   * PUT or PATCH bets/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async update ({ params, request, response }) {
-  }
+    try {
+      const bet = await Bet.findOrFail(id);
 
-  /**
-   * Delete a bet with id.
-   * DELETE bets/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async destroy ({ params, request, response }) {
+      bet.delete();
+    } catch (error) {
+      console.log(error);
+      return error.message.includes("Cannot find database")
+        ? response.status(404).send({ message: "Não encontramos essa aposta." })
+        : response
+            .status(404)
+            .send({ message: "Algo deu errado ao excluir a aposta." });
+    }
   }
 }
 
-module.exports = BetController
+module.exports = BetController;

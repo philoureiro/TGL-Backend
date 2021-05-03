@@ -3,12 +3,19 @@
 const User = use('App/Models/User')
 
 class UserController {
-  async store ({request}){
+  async store ({request, response}){
     const data = request.only(['username', 'email', 'password'])
+    try {
+      const user = await User.create(data)
 
-    const user = await User.create(data)
+      return user
 
-    return user
+    } catch (error) {
+      return error.message.includes('duplicate key value violates unique constraint') ? response.status(404).send({message: 'Já existe um usuário cadastrado com esse email.'}) :
+      response.send({message: 'Não foi possível criar o usuário'})
+
+    }
+
   }
 
   async update ({request, response, params}){
@@ -45,7 +52,30 @@ class UserController {
       }
       return response.status(404).send({message: 'Não foi possível deletar o usuário!'})
     }
+  }
 
+  async show({params, response}){
+    const {id} = params;
+
+    try {
+      const user = await User.findOrFail(id);
+      return user;
+    } catch (error) {
+      return error.message.includes('Cannot find database') ? response.status(404).send({message: 'Usuário inexistente.'}) :
+      response.status(404).send({message: 'Não encontramos o usuário.'})
+    }
+  }
+
+
+  async index({response}){
+
+    try {
+      const users = await User.all()
+      return users;
+    } catch (error) {
+      return error.message.includes('Cannot find database') ? response.status(404).send({message: 'Usuário inexistente.'}) :
+      response.status(404).send({message: 'Não encontramos o usuário.'})
+    }
   }
 }
 
