@@ -2,12 +2,16 @@
 
 const Bet = use("App/Models/Bet");
 const Token = use("App/Models/Token");
+const jwt = require("jsonwebtoken");
 class BetController {
   async store({ request, response }) {
-    // const token = await Token.all();
-    // console.log(token);
-    const data = request.only(["type", "price", "numbers_selecteds"]);
-    console.log(data);
+    const data = request.only([
+      "type",
+      "price",
+      "numbers_selecteds",
+      "user_id",
+    ]);
+
     try {
       const bet = await Bet.create(data);
       return bet;
@@ -42,7 +46,7 @@ class BetController {
       const bet = await Bet.findOrFail(id);
       bet.merge(data);
       bet.save();
-      console.log(data, id);
+
       return bet;
     } catch (error) {
       console.log(error);
