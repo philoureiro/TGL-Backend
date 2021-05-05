@@ -1,11 +1,7 @@
-'use strict'
+"use strict";
 
+const Model = use("Model");
 
-const Model = use('Model')
+class Game extends Model {}
 
-class Game extends Model {
-
-}
-
-
-module.exports = Game
+module.exports = Game;

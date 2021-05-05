@@ -5,12 +5,7 @@ const Token = use("App/Models/Token");
 
 class BetController {
   async store({ request, response }) {
-    const data = request.only([
-      "type",
-      "price",
-      "numbers_selecteds",
-      "user_id",
-    ]);
+    const data = request.only(["price", "numbers_selecteds", "user_id"]);
 
     try {
       const bet = await Bet.create(data);
