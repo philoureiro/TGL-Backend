@@ -2,7 +2,7 @@
 
 const Bet = use("App/Models/Bet");
 const Token = use("App/Models/Token");
-const jwt = require("jsonwebtoken");
+
 class BetController {
   async store({ request, response }) {
     const data = request.only([

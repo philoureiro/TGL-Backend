@@ -12,19 +12,21 @@ Route.put("forgotpassword", "ForgotPasswordController.update").validator(
 
 // Rotas de usuarios
 Route.post("users", "UserController.store").validator("User");
-Route.put("users/:id", "UserController.update").validator("User");
-Route.delete("users/:id", "UserController.destroy");
-Route.get("users/:id", "UserController.show");
-Route.get("users", "UserController.index");
-
-//Rotas de game
-Route.post("games", "GameController.store").validator("Game");
-Route.put("games/:id", "GameController.update").validator("Game");
-Route.get("games/:id", "GameController.show");
-Route.get("games", "GameController.index");
-Route.delete("games/:id", "GameController.destroy");
 
 Route.group(() => {
+  // Rotas de usuarios
+  Route.put("users/:id", "UserController.update").validator("User");
+  Route.delete("users/:id", "UserController.destroy");
+  Route.get("users/:id", "UserController.show");
+  Route.get("users", "UserController.index");
+
+  //Rotas de game
+  Route.post("games", "GameController.store").validator("Game");
+  Route.put("games/:id", "GameController.update").validator("Game");
+  Route.get("games/:id", "GameController.show");
+  Route.get("games", "GameController.index");
+  Route.delete("games/:id", "GameController.destroy");
+
   //rotas de apostas
   Route.post("bets", "BetController.store").validator("Bet");
   Route.put("bets/:id", "BetController.update").validator("Bet");

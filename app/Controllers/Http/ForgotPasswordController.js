@@ -31,15 +31,9 @@ class ForgotPasswordController {
           .subject("Recuperação de senha.");
       }
     );
-    // } catch (error) {
-    //   return response
-    //     .status(error.status)
-    //     .send({ error: { message: "Algo não deu certo. Esse email existe?" } });
-    // }
   }
 
   async update({ request, response }) {
-    //try {
     const { token, password } = request.all();
     const user = await User.findByOrFail("token", token);
 
@@ -57,10 +51,6 @@ class ForgotPasswordController {
     user.token_created_at = null;
     user.password = password;
     await user.save();
-
-    // } catch (error) {
-    //   return response.status(error.status).send({error: {message: 'Algo deu errado ao resetar a sua senha.'}})
-    // }
   }
 }
 
