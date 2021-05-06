@@ -4,7 +4,10 @@ const File = use("App/Models/File");
 const Helpers = use("Helpers");
 
 class FileController {
-  async store({ request, response }) {
+  async store({ request, response, auth }) {
+    const { id } = auth._instanceUser["$attributes"];
+    //console.log(id);
+
     try {
       if (!request.file("file")) return;
 
@@ -21,6 +24,7 @@ class FileController {
       }
 
       const file = await File.create({
+        user_id: id,
         file: filename,
         name: upload.clientName,
         type: upload.type,

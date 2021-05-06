@@ -5,63 +5,63 @@
       "description": "Escolha 15 números para apostar na lotofácil. Você ganha acertando 11, 12, 13, 14 ou 15 números. São muitas chances de ganhar, e agora você joga de onde estiver!",
       "range": 25,
       "price": 2.5,
-      "max-number": 15,
+      "max_number": 15,
       "color": "#7F3992",
-      "min-cart-value": 30
+      "min_cart_value": 30
     },
     {
       "type": "Mega-Sena",
       "description": "Escolha 6 números dos 60 disponíveis na mega-sena. Ganhe com 6, 5 ou 4 acertos. São realizados dois sorteios semanais para você apostar e torcer para ficar milionário.",
       "range": 60,
       "price": 4.5,
-      "max-number": 6,
+      "max_number": 6,
       "color": "#01AC66",
-      "min-cart-value": 30
+      "min_cart_value": 30
     },
     {
       "type": "Quina",
       "description": "Escolha 5 números dos 80 disponíveis na quina. 5, 4, 3 ou 2 acertos. São seis sorteios semanais e seis chances de ganhar.",
       "range": 80,
       "price": 2,
-      "max-number": 5,
+      "max_number": 5,
       "color": "#F79C31",
-      "min-cart-value": 30
+      "min_cart_value": 30
     },
     {
       "type": "Lotomania",
       "description": "A Lotomania é fácil de jogar e de ganhar: basta escolher 50 números e então concorrer a prêmios para acertos de 20, 19, 18, 17, 16, 15 ou nenhum número.",
       "range": 50,
       "price": 3.5,
-      "max-number": 20,
+      "max_number": 20,
       "color": "#FF1493",
-      "min-cart-value": 30
+      "min_cart_value": 30
     },
     {
       "type": "Dupla-Sena",
       "description": "Com apenas um bilhete da Dupla Sena, você tem o dobro de chances de ganhar: são dois sorteios por concurso e ganha acertando 3, 4, 5 ou 6 números no primeiro e/ou segundo sorteios.",
       "range": 50,
       "price": 2.5,
-      "max-number": 6,
+      "max_number": 6,
       "color": "#F02828",
-      "min-cart-value": 30
+      "min_cart_value": 30
     },
     {
       "type": "Timemania",
       "description": "Você escolhe dez números entre os oitenta disponíveis e um Time do Coração. São sorteados sete números e um Time do Coração por concurso. Se você tiver de três a sete acertos, ou acertar o time do coração, ganha.",
       "range": 80,
       "price": 3,
-      "max-number": 10,
+      "max_number": 10,
       "color": "#2E4A01",
-      "min-cart-value": 30
+      "min_cart_value": 30
     },
     {
       "type": "Dia de sorte",
       "description": "O Dia de Sorte é a loteria onde você aposta seus números da sorte. Escolha de 7 a 15 números dentre os 31 disponíveis e mais 1 “Mês de Sorte”. São sorteados sete números e um “Mês de Sorte” por concurso.",
       "range": 31,
       "price": 2,
-      "max-number": 7,
+      "max_number": 7,
       "color": "#443B3B",
-      "min-cart-value": 30
+      "min_cart_value": 30
     }
   ]
 }

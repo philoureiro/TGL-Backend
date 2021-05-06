@@ -7,7 +7,6 @@ class Bet {
   get rules() {
     return {
       // validation rules
-      user_id: "required",
       type: "required",
       price: "required",
       numbers_selecteds: "required",
