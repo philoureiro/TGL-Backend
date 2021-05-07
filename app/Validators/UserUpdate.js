@@ -5,9 +5,11 @@ class User {
     return true;
   }
   get rules() {
+    const userId = this.ctx.params.id;
     return {
+      // validation rules
       username: "required",
-      email: "required|email|unique:users",
+      email: `unique:users,email,id,${userId}`,
       password: "required|confirmed",
     };
   }

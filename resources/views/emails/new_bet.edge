@@ -1,0 +1,14 @@
+<strong>Olá ({{ name }})!!</strong>
+
+<p>Sua bet foi realizada com sucesso! </p>
+<p>Esse(s) foram seus games</p>
+
+@each(game in allBets)
+  <p> Jogo = {{ game.type }} </p>
+  <p> Números = {{ game.numbers_selecteds }} </p>
+  <p> Data = {{ date }} </p>
+  <p> Preço = {{ game.price }} </p>
+@endeach
+
+
+<p> Fique de olho no resultado!! </p>

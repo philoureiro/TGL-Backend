@@ -7,9 +7,9 @@ class Bet {
   get rules() {
     return {
       // validation rules
-      type: "required",
-      price: "required",
-      numbers_selecteds: "required",
+
+      totalPrice: "required",
+      cart: "required",
     };
   }
 }

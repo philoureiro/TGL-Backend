@@ -7,7 +7,7 @@ class GamesSchema extends Schema {
   up() {
     this.create("games", (table) => {
       table.increments();
-      table.string("type").notNullable();
+      table.string("type").notNullable().unique();
       table.string("description").notNullable();
       table.float("price", 2).notNullable();
       table.integer("range").notNullable();

@@ -15,9 +15,9 @@ class BetsSchema extends Schema {
         .onUpdate("CASCADE")
         .onDelete("SET NULL");
       table
-        .integer("game_id")
+        .string("type")
         .unsigned()
-        .references("id")
+        .references("type")
         .inTable("games")
         .onUpdate("CASCADE")
         .onDelete("SET NULL");

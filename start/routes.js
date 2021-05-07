@@ -11,11 +11,11 @@ Route.put("forgotpassword", "ForgotPasswordController.update").validator(
 );
 
 // Rotas de usuarios
-Route.post("users", "UserController.store").validator("User");
+Route.post("users", "UserController.store").validator("UserCreate");
 
 Route.group(() => {
   // Rotas de usuarios
-  Route.put("users/:id", "UserController.update").validator("User");
+  Route.put("users/:id", "UserController.update").validator("UserUpdate");
   Route.delete("users/:id", "UserController.destroy");
   Route.get("users/:id", "UserController.show");
   Route.get("users", "UserController.index");
@@ -30,7 +30,7 @@ Route.group(() => {
   //rotas de apostas
   Route.post("bets", "BetController.store").validator("Bet");
   Route.put("bets/:id", "BetController.update").validator("Bet");
-  Route.get("bets", "BetController.index");
+  Route.get("bets/:params", "BetController.index");
   Route.get("bets/:id", "BetController.show");
   Route.delete("bets/:id", "BetController.destroy");
 
