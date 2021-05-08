@@ -92,15 +92,24 @@ class BetController {
 
   async index({ response, params, auth }) {
     try {
-      const filterOfBets = params.params.split("=");
-      console.log(filterOfBets);
+      const filterOfBetsParams = params.params.split("=");
 
-      const bets = await Bet.query().where({ user_id: auth.user.id }).fetch();
+      const userBets = await Bet.query()
+        .where({ user_id: auth.user.id })
+        .fetch();
 
-      //buscar todos os campos que coincidirem com o usuario e pelo menos um dos
-      //paramentros caso tenha paramentros
+      let allBetsFiltereds = [];
 
-      return bets;
+      //verifica se existe jogos salvos com o mesmo tipo e salva no vetor
+      userBets.rows.map((bet) => {
+        filterOfBetsParams.map((params) => {
+          if (bet.type === params) {
+            allBetsFiltereds.push(bet);
+          }
+        });
+      });
+
+      return allBetsFiltereds;
     } catch (error) {
       return response;
       console
@@ -129,32 +138,72 @@ class BetController {
     }
   }
 
-  async update({ params, request, response }) {
-    const { id } = params;
+  async update({ params, request, response, auth }) {
     try {
+      const { id } = params;
       const data = request.only(["type", "price", "numbers_selecteds"]);
-      const bet = await Bet.findOrFail(id);
-      bet.merge(data);
-      bet.save();
 
-      return bet;
+      //busca todos os tipos de jogos do banco
+      let typeOfGame = [];
+      const betsTypes = await Game.query().columns("type").fetch();
+
+      //filtra se existem jogos com o mesmo tipo do passado por parametro
+      typeOfGame = betsTypes.rows.filter((bet) => {
+        return bet.type === data.type;
+      });
+
+      if (typeOfGame.length === 0) {
+        return response.status(404).send({
+          message: "Tipo de jogo não encontrado!",
+        });
+      }
+
+      const checkIfDuplicate = (array) => {
+        return array.length !== new Set(array).size;
+      };
+
+      //checa se nao tem numero repetido e encontra o jogo salvo do usuario pelo id
+      if (!checkIfDuplicate(data.numbers_selecteds.split(","))) {
+        const userBets = await Bet.query()
+          .where({ user_id: auth.user.id, id: id })
+          .fetch();
+
+        //checa se encontrou um jogo no banco, altera os dados e salva
+        if (userBets.rows.length > 0) {
+          userBets.rows[0].merge({
+            user_id: auth.user.id,
+            type: data.type,
+            price: data.price,
+            numbers_selecteds: data.numbers_selecteds,
+          });
+
+          userBets.rows[0].save();
+          return userBets.rows[0];
+        } else {
+          return response.status(404).send({
+            message: "Não existe jogo com esse id!",
+          });
+        }
+      } else {
+        return response.status(404).send({
+          message: "Jogo com número repetido!",
+        });
+      }
     } catch (error) {
       console.log(error);
-      return error.message.includes("Cannot find database")
-        ? response.status(404).send({ message: "Não encontramos essa aposta." })
-        : response
-            .status(404)
-            .send({ message: "Algo deu errado ao atualizar a aposta!" });
+      response.status(404).send({ message: "Erro ao atualizar aposta." });
     }
   }
 
-  async destroy({ params, response }) {
+  async destroy({ params, response, auth }) {
     const { id } = params;
 
     try {
-      const bet = await Bet.findOrFail(id);
+      const bet = await Bet.query()
+        .where({ user_id: auth.user.id, id: id })
+        .fetch();
 
-      bet.delete();
+      bet.rows[0].delete();
     } catch (error) {
       console.log(error);
       return error.message.includes("Cannot find database")
