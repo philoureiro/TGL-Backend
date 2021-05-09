@@ -47,7 +47,7 @@ class FileController {
       const file = await File.query()
         .where({ user_id: auth.user.id, id: id })
         .fetch();
-      console.log(file);
+
       return response.download(Helpers.tmpPath(`uploads/${file.rows[0].file}`));
     } catch (error) {
       console.log(error);
@@ -122,7 +122,6 @@ class FileController {
         return id;
       }
     } catch (error) {
-      console.log(error);
       return response.status(404).send({
         error: { message: "Erro ao encontrar o arquivo." },
       });
