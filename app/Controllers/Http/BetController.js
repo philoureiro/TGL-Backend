@@ -122,6 +122,8 @@ class BetController {
   async show({ params, response, auth }) {
     try {
       const { id } = params;
+      console.log(id);
+      console.log(auth.user.id);
 
       const bets = await Bet.query()
         .where({ user_id: auth.user.id, id: id })

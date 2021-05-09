@@ -30,7 +30,7 @@ Route.group(() => {
   //rotas de apostas
   Route.post("bets", "BetController.store").validator("Bet");
   Route.put("bets/:id", "BetController.update").validator("BetUpdate");
-  Route.get("bets/:params", "BetController.index");
+  Route.get("bets/filter/:params", "BetController.index");
   Route.get("bets/:id", "BetController.show");
   Route.delete("bets/:id", "BetController.destroy");
 

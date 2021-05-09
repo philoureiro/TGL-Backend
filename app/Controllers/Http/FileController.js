@@ -40,12 +40,15 @@ class FileController {
     }
   }
 
-  async show({ params, request, response, view }) {
+  async show({ params, request, response, auth }) {
     const { id } = params;
+    console.log(id);
     try {
-      const file = await File.findOrFail(id);
-
-      return response.download(Helpers.tmpPath(`uploads/${file.file}`));
+      const file = await File.query()
+        .where({ user_id: auth.user.id, id: id })
+        .fetch();
+      console.log(file);
+      return response.download(Helpers.tmpPath(`uploads/${file.rows[0].file}`));
     } catch (error) {
       console.log(error);
       return response.status(404).send({
@@ -54,38 +57,45 @@ class FileController {
     }
   }
 
-  async update({ params, request, response }) {
+  async update({ params, request, response, auth }) {
     const { id } = params;
     try {
       if (!request.file("file")) return;
 
-      const fileBD = await File.findOrFail(id);
+      const fileBD = await File.query()
+        .where({ user_id: auth.user.id, id: id })
+        .fetch();
 
-      const upload = request.file("file", { size: "2mb" });
+      if (fileBD.rows.length === 0) {
+        return response.status(404).send({
+          error: { message: "Erro ao encontrar arquivo." },
+        });
+      } else {
+        const upload = request.file("file", { size: "2mb" });
+        const filename = `${Date.now()}.${upload.subtype}`;
 
-      const filename = `${Date.now()}.${upload.subtype}`;
+        const fs = Helpers.promisify(require("fs"));
+        await fs.unlink(Helpers.tmpPath(`uploads/${fileBD.rows[0].file}`));
 
-      const fs = Helpers.promisify(require("fs"));
-      await fs.unlink(Helpers.tmpPath(`uploads/${fileBD.file}`));
+        await upload.move(Helpers.tmpPath("uploads"), {
+          name: filename,
+        });
 
-      await upload.move(Helpers.tmpPath("uploads"), {
-        name: filename,
-      });
+        if (!upload.moved()) {
+          throw upload.error();
+        }
 
-      if (!upload.moved()) {
-        throw upload.error();
+        const file = {
+          file: filename,
+          name: upload.clientName,
+          type: upload.type,
+          subtype: upload.subtype,
+        };
+
+        fileBD.rows[0].merge(file);
+        fileBD.rows[0].save();
+        return fileBD;
       }
-
-      const file = {
-        file: filename,
-        name: upload.clientName,
-        type: upload.type,
-        subtype: upload.subtype,
-      };
-
-      fileBD.merge(file);
-      fileBD.save();
-      return fileBD;
     } catch (error) {
       console.log(error);
       return response.status(404).send({
@@ -94,14 +104,23 @@ class FileController {
     }
   }
 
-  async destroy({ params, request, response }) {
+  async destroy({ params, response, auth }) {
     const { id } = params;
+    const fs = Helpers.promisify(require("fs"));
     try {
-      const file = await File.findOrFail(id);
-      const fs = Helpers.promisify(require("fs"));
-      await fs.unlink(Helpers.tmpPath(`uploads/${file.file}`));
-      file.delete();
-      return id;
+      const file = await File.query()
+        .where({ user_id: auth.user.id, id: id })
+        .fetch();
+
+      if (file.rows.length === 0) {
+        response.status(404).send({
+          error: { message: "Não encontramos nenhum arquivo com esse id." },
+        });
+      } else {
+        await fs.unlink(Helpers.tmpPath(`uploads/${file.rows[0].file}`));
+        file.rows[0].delete();
+        return id;
+      }
     } catch (error) {
       console.log(error);
       return response.status(404).send({
