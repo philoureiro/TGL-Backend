@@ -7,7 +7,6 @@ class SessionController {
     const { email, password } = request.all();
     const currentToken = await auth.attempt(email, password);
     const user = await User.findBy("email", email);
-    console.log(auth.uid);
     return { user, currentToken };
   }
 }

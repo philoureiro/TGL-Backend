@@ -90,26 +90,30 @@ class BetController {
     }
   }
 
-  async index({ response, params, auth }) {
+  async index({ response, params, auth, request }) {
     try {
-      const filterOfBetsParams = params.params.split("=");
-
+      const data = request.only(["filter"]);
+      let allBetsFiltereds = [];
+      // console.log("filter", data.filter);
       const userBets = await Bet.query()
         .where({ user_id: auth.user.id })
         .fetch();
 
-      let allBetsFiltereds = [];
-
-      //verifica se existe jogos salvos com o mesmo tipo e salva no vetor
-      userBets.rows.map((bet) => {
-        filterOfBetsParams.map((params) => {
-          if (bet.type === params) {
-            allBetsFiltereds.push(bet);
-          }
+      if (data.filter.length === 0) {
+        return userBets.rows;
+      } else {
+        //verifica se existe jogos salvos com o mesmo tipo e salva no vetor
+        userBets.rows.map((bet) => {
+          data.filter.map((params) => {
+            console.log("params", params);
+            if (bet.type === params) {
+              allBetsFiltereds.push(bet);
+            }
+          });
         });
-      });
 
-      return allBetsFiltereds;
+        return allBetsFiltereds;
+      }
     } catch (error) {
       return response;
       console
