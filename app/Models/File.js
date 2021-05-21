@@ -7,8 +7,8 @@ class File extends Model {
   static get computed() {
     return ["url"];
   }
-  getUrl({ id }) {
-    return `${Env.get("APP_URL")}/files/${id}`;
+  getUrl({ filename }) {
+    return `${Env.get("APP_URL")}/files/${filename}`;
   }
 
   user() {

@@ -7,8 +7,9 @@ const Mail = use("Mail");
 function verifyNumbersSelectedsAndTypesOfGame(cart, allTypesOfGames) {
   //verifica se tem algum numero repetido nas apostas,
   //e filtra todos os numeros repetidos por jogo
+  console.log(cart);
   const equalsNumbers = cart.map((element) => {
-    return element.numbers_selecteds
+    return element.numbersSelecteds
       .split(",")
       .filter(function (elem, index, arr) {
         return arr.indexOf(elem) !== index;
@@ -51,7 +52,7 @@ class BetController {
               user_id: auth.user.id,
               type: element.type,
               price: element.price,
-              numbers_selecteds: element.numbers_selecteds,
+              numbers_selecteds: element.numbersSelecteds,
             });
           })
         : response.status(404).send({

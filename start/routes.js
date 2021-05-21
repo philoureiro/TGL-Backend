@@ -13,6 +13,9 @@ Route.put("forgotpassword", "ForgotPasswordController.update").validator(
 // Rotas de usuarios
 Route.post("users", "UserController.store").validator("UserCreate");
 
+//rota de arquivo publica
+Route.get("files/:filename", "FileController.show");
+
 Route.group(() => {
   // Rotas de usuarios
   Route.put("users/:id", "UserController.update").validator("UserUpdate");
@@ -30,13 +33,13 @@ Route.group(() => {
   //rotas de apostas
   Route.post("bets", "BetController.store").validator("Bet");
   Route.put("bets/:id", "BetController.update").validator("BetUpdate");
-  Route.get("bets/filter/", "BetController.index");
+  Route.post("bets/filter/", "BetController.index");
   Route.get("bets/:id", "BetController.show");
   Route.delete("bets/:id", "BetController.destroy");
 
   //rotas de arquivos
   Route.post("/files", "FileController.store");
   Route.put("/files/:id", "FileController.update");
-  Route.get("/files/:id", "FileController.show");
   Route.delete("/files/:id", "FileController.destroy");
+  Route.get("/files/", "FileController.index");
 }).middleware(["auth"]);

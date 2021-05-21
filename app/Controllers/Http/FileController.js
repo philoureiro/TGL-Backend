@@ -40,15 +40,28 @@ class FileController {
     }
   }
 
-  async show({ params, request, response, auth }) {
-    const { id } = params;
-    console.log(id);
+  async index({ response, auth }) {
     try {
-      const file = await File.query()
-        .where({ user_id: auth.user.id, id: id })
-        .fetch();
+      const file = await File.query().where({ user_id: auth.user.id }).first();
 
-      return response.download(Helpers.tmpPath(`uploads/${file.rows[0].file}`));
+      console.log(file);
+      return file.file;
+    } catch (error) {
+      console.log(error);
+      return response.status(404).send({
+        error: { message: "Erro ao encontrar o arquivo." },
+      });
+    }
+  }
+
+  async show({ response, auth, params }) {
+    try {
+      const { filename } = params;
+      const file = await File.query().where({ file: filename }).first();
+
+      console.log(file);
+
+      return response.download(Helpers.tmpPath(`uploads/${file.file}`));
     } catch (error) {
       console.log(error);
       return response.status(404).send({
