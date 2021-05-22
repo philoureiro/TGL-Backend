@@ -4,12 +4,11 @@ const Bet = use("App/Models/Bet");
 const Game = use("App/Models/Game");
 const Mail = use("Mail");
 
-function verifyNumbersSelectedsAndTypesOfGame(cart, allTypesOfGames) {
+const verifyNumbersSelectedsAndTypesOfGame = (cart, allTypesOfGames) => {
   //verifica se tem algum numero repetido nas apostas,
   //e filtra todos os numeros repetidos por jogo
-  console.log(cart);
   const equalsNumbers = cart.map((element) => {
-    return element.numbersSelecteds
+    return element.numbers_selecteds
       .split(",")
       .filter(function (elem, index, arr) {
         return arr.indexOf(elem) !== index;
@@ -27,7 +26,7 @@ function verifyNumbersSelectedsAndTypesOfGame(cart, allTypesOfGames) {
   });
 
   return gamesNotRegistered;
-}
+};
 class BetController {
   async store({ request, response, auth }) {
     try {
@@ -37,7 +36,7 @@ class BetController {
 
       const betsTypes = await Game.query().columns("type").fetch();
 
-      betsTypes.rows.map((element) => {
+      betsTypes.rows.forEach((element) => {
         allTypesOfGames.push(element.type);
       });
 
@@ -52,7 +51,7 @@ class BetController {
               user_id: auth.user.id,
               type: element.type,
               price: element.price,
-              numbers_selecteds: element.numbersSelecteds,
+              numbers_selecteds: element.numbers_selecteds,
             });
           })
         : response.status(404).send({
@@ -80,7 +79,7 @@ class BetController {
             message
               .to(auth.user.email)
               .from("teste@teste.com", "teste")
-              .subject("Novo usuário!");
+              .subject("Nova Aposta!");
           }
         );
         return bets;
@@ -104,8 +103,8 @@ class BetController {
         return userBets.rows;
       } else {
         //verifica se existe jogos salvos com o mesmo tipo e salva no vetor
-        userBets.rows.map((bet) => {
-          data.filter.map((params) => {
+        userBets.rows.forEach((bet) => {
+          data.filter.forEach((params) => {
             console.log("params", params);
             if (bet.type === params) {
               allBetsFiltereds.push(bet);

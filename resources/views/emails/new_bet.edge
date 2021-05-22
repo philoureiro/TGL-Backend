@@ -1,14 +1,29 @@
-<strong>Olá ({{ name }})!!</strong>
 
-<p>Sua bet foi realizada com sucesso! </p>
-<p>Esse(s) foram seus games</p>
+<body>
+  <div style="height:100vh;display:flex;align-items:center;justify-content:center;max-width:700px;flex-direction:column;text-align:center;background:#B5C401">
+    <div style="background:#F7F7F7;border-radius:15px;height:500px;display:flex;align-items:center;justify-content:center;flex-direction:column;width:80%">
+      <img style ='height: 100px; width: 300px; margin-bottom: 50px' src="https://i0.wp.com/www.tecart.com.au/wp-content/uploads/2020/07/TGL.png?fit=3140%2C1141&ssl=1">
+      <strong style="color:#B5C401;font-size:20px;font-style:regular;font-weight:bold;">
+        Está feliz por fazer aquela fézinha hoje né {{name}}?
+      </strong>
+      <p>Aqui está seu comprovante de aposta, com ele você pode conferir o sorteio!</p>
+      <table style="border: 1px solid black; borderCollapse: collapse;">
+        <tr>
+          <th style="border: 1px solid black;padding: 5px; textAlign: center">Tipo</th>
+          <th style="border: 1px solid black;padding: 5px; textAlign: center">Números Selecionados</th>
+          <th style="border: 1px solid black;padding: 5px; textAlign: center">Data</th>
+          <th style="border: 1px solid black;padding: 5px; textAlign: center">Preço</th>
+        </tr>
 
-@each(game in allBets)
-  <p> Jogo = {{ game.type }} </p>
-  <p> Números = {{ game.numbers_selecteds }} </p>
-  <p> Data = {{ date }} </p>
-  <p> Preço = {{ game.price }} </p>
-@endeach
-
-
-<p> Fique de olho no resultado!! </p>
+          @each(game in allBets)
+            <tr>
+              <td style="border: 1px solid black;padding: 5px; textAlign: center">{{game.type}}</td>
+              <td style="border: 1px solid black;padding: 5px; textAlign: center">{{game.numbers_selecteds}}</td>
+              <td style="border: 1px solid black;padding: 5px; textAlign: center">{{date}}</td>
+              <td style="border: 1px solid black;padding: 5px; textAlign: center">{{game.price}}</td>
+            </tr>
+          @endeach
+      </table>
+    </div>
+  </div>
+</body>
