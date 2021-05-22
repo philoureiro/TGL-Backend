@@ -39,7 +39,7 @@ Route.group(() => {
 
   //rotas de arquivos
   Route.post("/files", "FileController.store");
-  Route.put("/files/:id", "FileController.update");
+  Route.put("/files/:filename", "FileController.update");
   Route.delete("/files/:id", "FileController.destroy");
   Route.get("/files/", "FileController.index");
 }).middleware(["auth"]);

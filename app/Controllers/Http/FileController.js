@@ -43,8 +43,6 @@ class FileController {
   async index({ response, auth }) {
     try {
       const file = await File.query().where({ user_id: auth.user.id }).first();
-
-      console.log(file);
       return file.file;
     } catch (error) {
       console.log(error);
@@ -58,9 +56,6 @@ class FileController {
     try {
       const { filename } = params;
       const file = await File.query().where({ file: filename }).first();
-
-      console.log(file);
-
       return response.download(Helpers.tmpPath(`uploads/${file.file}`));
     } catch (error) {
       console.log(error);
@@ -71,24 +66,25 @@ class FileController {
   }
 
   async update({ params, request, response, auth }) {
-    const { id } = params;
+    const { filename } = params;
+    console.log("ué", filename);
     try {
       if (!request.file("file")) return;
 
       const fileBD = await File.query()
-        .where({ user_id: auth.user.id, id: id })
-        .fetch();
+        .where({ user_id: auth.user.id, file: filename })
+        .first();
 
-      if (fileBD.rows.length === 0) {
+      //console.log(fileBD);
+      if (fileBD === null) {
         return response.status(404).send({
           error: { message: "Erro ao encontrar arquivo." },
         });
       } else {
-        const upload = request.file("file", { size: "2mb" });
+        const upload = request.file("file", { size: "10mb" });
         const filename = `${Date.now()}.${upload.subtype}`;
 
         const fs = Helpers.promisify(require("fs"));
-        await fs.unlink(Helpers.tmpPath(`uploads/${fileBD.rows[0].file}`));
 
         await upload.move(Helpers.tmpPath("uploads"), {
           name: filename,
@@ -96,6 +92,8 @@ class FileController {
 
         if (!upload.moved()) {
           throw upload.error();
+        } else {
+          await fs.unlink(Helpers.tmpPath(`uploads/${fileBD.file}`));
         }
 
         const file = {
@@ -105,12 +103,12 @@ class FileController {
           subtype: upload.subtype,
         };
 
-        fileBD.rows[0].merge(file);
-        fileBD.rows[0].save();
+        fileBD.merge(file);
+        fileBD.save();
         return fileBD;
       }
     } catch (error) {
-      console.log(error);
+      console.log("error", error);
       return response.status(404).send({
         error: { message: "Erro no upload do arquivo." },
       });
