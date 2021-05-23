@@ -122,30 +122,52 @@ class BetController {
   async index({ response, params, auth, request }) {
     try {
       const data = request.only(["filter"]);
-      let allBetsFiltereds = [];
+      let allUserBetsInBD = [];
+      let userBetsFiltereds = [];
       // console.log("filter", data.filter);
-      const userBets = await Bet.query()
+      const userBetsBD = await Bet.query()
         .where({ user_id: auth.user.id })
+        .with("games")
         .fetch();
 
-      if (data.filter.length === 0) {
-        return userBets.rows;
-      } else {
-        //verifica se existe jogos salvos com o mesmo tipo e salva no vetor
-        userBets.rows.forEach((bet) => {
-          data.filter.forEach((params) => {
-            if (bet.game_id === params) {
-              allBetsFiltereds.push(bet);
-            }
-          });
-        });
+      //formata todas as apostas do usuário incluindo o tipo de jogo
+      // em string e salva em um vetor
 
-        return allBetsFiltereds;
-      }
+      userBetsBD.rows.forEach((bet, index) => {
+        allUserBetsInBD.push({
+          id: bet.id,
+          user_id: bet.user_id,
+          game_id: bet.game_id,
+          game_type: userBetsBD.rows[index]["$relations"].games.type,
+          price: bet.price,
+          numbers_selecteds: bet.numbers_selecteds,
+          date: bet.updated_at,
+        });
+      });
+
+      //filtra as apostas de acordo com os paramentros passados ou retorna
+      //todas as apostas caso não exista nenum paramentro
+
+      allUserBetsInBD.forEach((bet, index) => {
+        return data.filter.forEach((param, index) => {
+          return param === bet.game_id
+            ? userBetsFiltereds.push({
+                id: bet.id,
+                user_id: bet.user_id,
+                game_id: bet.game_id,
+                game_type: userBetsBD.rows[index]["$relations"].games.type,
+                price: bet.price,
+                numbers_selecteds: bet.numbers_selecteds,
+                date: bet.updated_at,
+              })
+            : null;
+        });
+      });
+
+      return userBetsFiltereds.length > 0 ? userBetsFiltereds : allUserBetsInBD;
     } catch (error) {
-      return response;
-      console
-        .log(error)
+      console.log(error);
+      return response
         .status(error.status)
         .send({ error: { message: "Erro recuperar bets!" } });
     }
