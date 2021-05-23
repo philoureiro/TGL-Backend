@@ -135,7 +135,7 @@ class BetController {
         userBets.rows.forEach((bet) => {
           data.filter.forEach((params) => {
             console.log("params", params);
-            if (bet.type === params) {
+            if (bet.game_id === params) {
               allBetsFiltereds.push(bet);
             }
           });
@@ -176,18 +176,18 @@ class BetController {
   async update({ params, request, response, auth }) {
     try {
       const { id } = params;
-      const data = request.only(["type", "price", "numbers_selecteds"]);
+      const data = request.only(["id", "price", "numbers_selecteds"]);
 
       //busca todos os tipos de jogos do banco
-      let typeOfGame = [];
-      const betsTypes = await Game.query().columns("type").fetch();
+
+      const betsTypes = await Game.query().columns("id").fetch();
 
       //filtra se existem jogos com o mesmo tipo do passado por parametro
-      typeOfGame = betsTypes.rows.filter((bet) => {
-        return bet.type === data.type;
+      const idOfGame = betsTypes.rows.filter((bet) => {
+        return bet.id === data.id;
       });
 
-      if (typeOfGame.length === 0) {
+      if (idOfGame.length === 0) {
         return response.status(404).send({
           message: "Tipo de jogo não encontrado!",
         });
@@ -201,22 +201,22 @@ class BetController {
       if (!checkIfDuplicate(data.numbers_selecteds.split(","))) {
         const userBets = await Bet.query()
           .where({ user_id: auth.user.id, id: id })
-          .fetch();
+          .first();
 
         //checa se encontrou um jogo no banco, altera os dados e salva
-        if (userBets.rows.length > 0) {
-          userBets.rows[0].merge({
+        if (userBets !== null) {
+          userBets.merge({
             user_id: auth.user.id,
-            type: data.type,
+            game_id: data.id,
             price: data.price,
             numbers_selecteds: data.numbers_selecteds,
           });
 
-          userBets.rows[0].save();
-          return userBets.rows[0];
+          userBets.save();
+          return userBets;
         } else {
           return response.status(404).send({
-            message: "Não existe jogo com esse id!",
+            message: "Não existe aposta salva com esse id!",
           });
         }
       } else {
