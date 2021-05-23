@@ -4,7 +4,7 @@ class updateBet {
   get rules() {
     return {
       // validation rules
-      type: "required",
+      id: "required",
       price: "required",
       numbers_selecteds: "required",
     };
