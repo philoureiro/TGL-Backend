@@ -15,17 +15,28 @@ const verifyNumbersSelectedsAndTypesOfGame = (cart, allTypesOfGames) => {
       });
   });
 
-  //verifica se existem todos os tipos de jogos no banco de dados,
-  //verifica se existe dentro algo dentro do array de numeros repetidos
-  //e filtra todos os jogos que não satisfazem ambas as regras
-  const gamesNotRegistered = cart.filter((element, index) => {
-    return (
-      !allTypesOfGames.includes(element.type) ||
-      equalsNumbers[index].length !== 0
-    );
+  let gamesValidated = [];
+  let gamesInvalited = [];
+
+  //separa todos os jogos válidos baseados em numeros não repetidos e id igual ao do banco
+  cart.forEach((bet, index) => {
+    allTypesOfGames.forEach((game) => {
+      if (bet.id === game.id && equalsNumbers[index].length === 0) {
+        gamesValidated.push(bet);
+      }
+    });
   });
 
-  return gamesNotRegistered;
+  //separa todos os jogos não válidos baseado nos jogos válidos
+  cart.forEach((bet) => {
+    gamesValidated.forEach((game) => {
+      if (!gamesValidated.includes(bet)) {
+        gamesInvalited.push(bet);
+      }
+    });
+  });
+
+  return gamesInvalited;
 };
 class BetController {
   async store({ request, response, auth }) {
@@ -34,22 +45,22 @@ class BetController {
       let allTypesOfGames = [];
       let allBets = [];
 
-      const betsTypes = await Game.query().columns("type").fetch();
+      const betsTypes = await Game.query().columns("id", "type").fetch();
 
       betsTypes.rows.forEach((element) => {
-        allTypesOfGames.push(element.type);
+        allTypesOfGames.push({ id: element.id, type: element.type });
       });
 
-      const unauthorizedGames = verifyNumbersSelectedsAndTypesOfGame(
+      const gamesInvalited = verifyNumbersSelectedsAndTypesOfGame(
         data.cart,
         allTypesOfGames
       );
 
-      unauthorizedGames.length === 0
+      gamesInvalited.length === 0
         ? data.cart.map((element) => {
             allBets.push({
               user_id: auth.user.id,
-              type: element.type,
+              game_id: element.id,
               price: element.price,
               numbers_selecteds: element.numbers_selecteds,
             });
@@ -57,11 +68,25 @@ class BetController {
         : response.status(404).send({
             message:
               "Aposta com números repetidos ou tipos de jogos inválidos.",
-            unauthorizedGames,
+            gamesInvalited,
           });
 
       if (allBets.length > 0) {
         const bets = await Bet.createMany(allBets);
+
+        // formatando as apostas para envio do email para o usuario
+        let betsForEmail = [];
+        allTypesOfGames.forEach((game) => {
+          data.cart.forEach((bet) => {
+            if (game.id === bet.id) {
+              betsForEmail.push({
+                type: game.type,
+                numbers_selecteds: bet.numbers_selecteds,
+                price: bet.price,
+              });
+            }
+          });
+        });
 
         // formatando a data enviando o email para o usuario
         const date = new Date();
@@ -74,7 +99,11 @@ class BetController {
 
         await Mail.send(
           ["emails.new_bet"],
-          { name: auth.user.username, allBets: allBets, date: dateFormated },
+          {
+            name: auth.user.username,
+            allBets: betsForEmail,
+            date: dateFormated,
+          },
           (message) => {
             message
               .to(auth.user.email)
