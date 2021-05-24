@@ -3,12 +3,14 @@
 const Bet = use("App/Models/Bet");
 const Game = use("App/Models/Game");
 const Mail = use("Mail");
+const moment = require("moment");
 
 const verifyNumbersSelectedsAndTypesOfGame = (cart, allTypesOfGames) => {
+  console.log(cart);
   //verifica se tem algum numero repetido nas apostas,
   //e filtra todos os numeros repetidos por jogo
   const equalsNumbers = cart.map((element) => {
-    return element.numbers_selecteds
+    return element.numbersSelecteds
       .split(",")
       .filter(function (elem, index, arr) {
         return arr.indexOf(elem) !== index;
@@ -62,7 +64,7 @@ class BetController {
               user_id: auth.user.id,
               game_id: element.id,
               price: element.price,
-              numbers_selecteds: element.numbers_selecteds,
+              numbers_selecteds: element.numbersSelecteds,
             });
           })
         : response.status(404).send({
@@ -134,6 +136,9 @@ class BetController {
       // em string e salva em um vetor
 
       userBetsBD.rows.forEach((bet, index) => {
+        let dataFormated = bet.updated_at;
+        dataFormated = moment().format("DD-MM-YYYY");
+
         allUserBetsInBD.push({
           id: bet.id,
           user_id: bet.user_id,
@@ -141,7 +146,7 @@ class BetController {
           game_type: userBetsBD.rows[index]["$relations"].games.type,
           price: bet.price,
           numbers_selecteds: bet.numbers_selecteds,
-          date: bet.updated_at,
+          date: dataFormated,
         });
       });
 
@@ -149,22 +154,30 @@ class BetController {
       //todas as apostas caso não exista nenum paramentro
 
       allUserBetsInBD.forEach((bet, index) => {
-        return data.filter.forEach((param, index) => {
-          return param === bet.game_id
-            ? userBetsFiltereds.push({
-                id: bet.id,
-                user_id: bet.user_id,
-                game_id: bet.game_id,
-                game_type: userBetsBD.rows[index]["$relations"].games.type,
-                price: bet.price,
-                numbers_selecteds: bet.numbers_selecteds,
-                date: bet.updated_at,
-              })
-            : null;
+        return data.filter.forEach((param) => {
+          if (param === bet.game_id) {
+            userBetsFiltereds.push({
+              id: bet.id,
+              user_id: bet.user_id,
+              game_id: bet.game_id,
+              game_type: userBetsBD.rows[index]["$relations"].games.type,
+              price: bet.price,
+              numbers_selecteds: bet.numbers_selecteds,
+              date: bet.date,
+            });
+          }
         });
       });
 
-      return userBetsFiltereds.length > 0 ? userBetsFiltereds : allUserBetsInBD;
+      if (userBetsFiltereds.length === 0 && data.filter.length > 0) {
+        return [];
+      }
+
+      if (userBetsFiltereds.length > 0 && data.filter.length > 0) {
+        return userBetsFiltereds;
+      }
+
+      return allUserBetsInBD;
     } catch (error) {
       console.log(error);
       return response
