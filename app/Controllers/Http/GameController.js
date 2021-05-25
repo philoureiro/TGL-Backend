@@ -19,16 +19,16 @@ class GameController {
     return game;
   }
 
+  async index() {
+    const games = await Game.all();
+    return games;
+  }
+
   async show({ params }) {
     const { id } = params;
     const game = await Game.findOrFail(id);
 
     return game;
-  }
-
-  async index() {
-    const games = await Game.all();
-    return games;
   }
 
   async update({ params, request, response }) {

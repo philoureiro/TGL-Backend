@@ -6,7 +6,7 @@ const Mail = use("Mail");
 const moment = require("moment");
 
 const verifyNumbersSelectedsAndTypesOfGame = (cart, allTypesOfGames) => {
-  console.log(cart);
+  console.log("cart", cart);
   //verifica se tem algum numero repetido nas apostas,
   //e filtra todos os numeros repetidos por jogo
   const equalsNumbers = cart.map((element) => {
@@ -83,7 +83,7 @@ class BetController {
             if (game.id === bet.id) {
               betsForEmail.push({
                 type: game.type,
-                numbers_selecteds: bet.numbers_selecteds,
+                numbers_selecteds: bet.numbersSelecteds,
                 price: bet.price,
               });
             }
@@ -124,60 +124,16 @@ class BetController {
   async index({ response, params, auth, request }) {
     try {
       const data = request.only(["filter"]);
-      let allUserBetsInBD = [];
-      let userBetsFiltereds = [];
-      // console.log("filter", data.filter);
+
       const userBetsBD = await Bet.query()
         .where({ user_id: auth.user.id })
-        .with("games")
+        .whereIn("game_id", data.filter)
+        .with("games", (games) => {
+          games.select("type", "id");
+        })
         .fetch();
 
-      //formata todas as apostas do usuário incluindo o tipo de jogo
-      // em string e salva em um vetor
-
-      userBetsBD.rows.forEach((bet, index) => {
-        let dataFormated = bet.updated_at;
-        dataFormated = moment().format("DD-MM-YYYY");
-
-        allUserBetsInBD.push({
-          id: bet.id,
-          user_id: bet.user_id,
-          game_id: bet.game_id,
-          game_type: userBetsBD.rows[index]["$relations"].games.type,
-          price: bet.price,
-          numbers_selecteds: bet.numbers_selecteds,
-          date: dataFormated,
-        });
-      });
-
-      //filtra as apostas de acordo com os paramentros passados ou retorna
-      //todas as apostas caso não exista nenum paramentro
-
-      allUserBetsInBD.forEach((bet, index) => {
-        return data.filter.forEach((param) => {
-          if (param === bet.game_id) {
-            userBetsFiltereds.push({
-              id: bet.id,
-              user_id: bet.user_id,
-              game_id: bet.game_id,
-              game_type: userBetsBD.rows[index]["$relations"].games.type,
-              price: bet.price,
-              numbers_selecteds: bet.numbers_selecteds,
-              date: bet.date,
-            });
-          }
-        });
-      });
-
-      if (userBetsFiltereds.length === 0 && data.filter.length > 0) {
-        return [];
-      }
-
-      if (userBetsFiltereds.length > 0 && data.filter.length > 0) {
-        return userBetsFiltereds;
-      }
-
-      return allUserBetsInBD;
+      return userBetsBD;
     } catch (error) {
       console.log(error);
       return response
@@ -189,12 +145,10 @@ class BetController {
   async show({ params, response, auth }) {
     try {
       const { id } = params;
-      console.log(id);
-      console.log(auth.user.id);
 
       const bets = await Bet.query()
         .where({ user_id: auth.user.id, id: id })
-        .fetch();
+        .firstOrFail();
 
       return bets;
     } catch (error) {
@@ -270,9 +224,9 @@ class BetController {
     try {
       const bet = await Bet.query()
         .where({ user_id: auth.user.id, id: id })
-        .fetch();
+        .firstOrFail();
 
-      bet.rows[0].delete();
+      await bet.delete();
     } catch (error) {
       console.log(error);
       return error.message.includes("Cannot find database")

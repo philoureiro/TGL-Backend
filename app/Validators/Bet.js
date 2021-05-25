@@ -7,7 +7,6 @@ class Bet {
   get rules() {
     return {
       // validation rules
-
       totalPrice: "required",
       cart: "required",
     };
