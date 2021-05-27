@@ -3,43 +3,10 @@
 const Bet = use("App/Models/Bet");
 const Game = use("App/Models/Game");
 const Mail = use("Mail");
-const moment = require("moment");
+const Database = use("Database");
+const VerifyNumbersSelecteds = require("../../Services/verifyNumbers");
+const dayjs = require("dayjs");
 
-const verifyNumbersSelectedsAndTypesOfGame = (cart, allTypesOfGames) => {
-  console.log("cart", cart);
-  //verifica se tem algum numero repetido nas apostas,
-  //e filtra todos os numeros repetidos por jogo
-  const equalsNumbers = cart.map((element) => {
-    return element.numbersSelecteds
-      .split(",")
-      .filter(function (elem, index, arr) {
-        return arr.indexOf(elem) !== index;
-      });
-  });
-
-  let gamesValidated = [];
-  let gamesInvalited = [];
-
-  //separa todos os jogos válidos baseados em numeros não repetidos e id igual ao do banco
-  cart.forEach((bet, index) => {
-    allTypesOfGames.forEach((game) => {
-      if (bet.id === game.id && equalsNumbers[index].length === 0) {
-        gamesValidated.push(bet);
-      }
-    });
-  });
-
-  //separa todos os jogos não válidos baseado nos jogos válidos
-  cart.forEach((bet) => {
-    gamesValidated.forEach((game) => {
-      if (!gamesValidated.includes(bet)) {
-        gamesInvalited.push(bet);
-      }
-    });
-  });
-
-  return gamesInvalited;
-};
 class BetController {
   async store({ request, response, auth }) {
     try {
@@ -53,7 +20,8 @@ class BetController {
         allTypesOfGames.push({ id: element.id, type: element.type });
       });
 
-      const gamesInvalited = verifyNumbersSelectedsAndTypesOfGame(
+      const verifyNumbers = new VerifyNumbersSelecteds();
+      const gamesInvalited = verifyNumbers.verifyNumbers(
         data.cart,
         allTypesOfGames
       );
@@ -64,7 +32,7 @@ class BetController {
               user_id: auth.user.id,
               game_id: element.id,
               price: element.price,
-              numbers_selecteds: element.numbersSelecteds,
+              numbers_selecteds: element.numbers_selecteds,
             });
           })
         : response.status(404).send({
@@ -83,22 +51,16 @@ class BetController {
             if (game.id === bet.id) {
               betsForEmail.push({
                 type: game.type,
-                numbers_selecteds: bet.numbersSelecteds,
+                numbers_selecteds: bet.numbers_selecteds,
                 price: bet.price,
               });
             }
           });
         });
 
-        // formatando a data enviando o email para o usuario
-        const date = new Date();
-        const dateFormated =
-          date.getDate() +
-          "/" +
-          (date.getMonth() + 1) +
-          "/" +
-          date.getFullYear();
-
+        // formatando os dados e enviando o email para o usuario
+        const dateFormated = dayjs(new Date()).format("DD/MM/YYYY");
+        console.log(dateFormated);
         await Mail.send(
           ["emails.new_bet"],
           {
@@ -125,17 +87,15 @@ class BetController {
     try {
       const data = request.only(["filter"]);
 
-      const userBetsBD = await Bet.query()
-        .where({ user_id: auth.user.id })
-        .whereIn("game_id", data.filter)
-        .with("games", (games) => {
-          games.select("type", "id");
-        })
-        .fetch();
+      const filterGame =
+        data.filter.length > 0 ? `and game_id in (${data.filter})` : "";
 
-      return userBetsBD;
+      const userBetsBD = await Database.raw(`select * from bets
+              where user_id = ${auth.user.id}
+              ${filterGame}`);
+
+      return userBetsBD.rows;
     } catch (error) {
-      console.log(error);
       return response
         .status(error.status)
         .send({ error: { message: "Erro recuperar bets!" } });
@@ -181,12 +141,10 @@ class BetController {
         });
       }
 
-      const checkIfDuplicate = (array) => {
-        return array.length !== new Set(array).size;
-      };
+      const verifyNumbers = new VerifyNumbersSelecteds();
 
       //checa se nao tem numero repetido e encontra o jogo salvo do usuario pelo id
-      if (!checkIfDuplicate(data.numbers_selecteds.split(","))) {
+      if (!verifyNumbers.checkIfDuplicate(data.numbers_selecteds.split(","))) {
         const userBets = await Bet.query()
           .where({ user_id: auth.user.id, id: id })
           .first();

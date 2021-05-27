@@ -8,7 +8,13 @@ class Bet {
     return {
       // validation rules
       totalPrice: "required",
-      cart: "required",
+      cart: [
+        {
+          id: "required",
+          price: "required",
+          numbers_selecteds: "required",
+        },
+      ],
     };
   }
 }

@@ -1,28 +1,33 @@
-class verifyNumbersSelecteds {
-  verifyNumbersSelectedsAndTypesOfGame(cart, allTypesOfGames) {
-    //verifica se tem algum numero repetido nas apostas,
-    //e filtra todos os numeros repetidos por jogo
-    console.log("verify", cart);
-    const equalsNumbers = cart.map((element) => {
-      return element.numbers_selecteds
-        .split(",")
-        .filter(function (elem, index, arr) {
-          return arr.indexOf(elem) !== index;
-        });
+"use strict";
+
+class VerifyNumbersSelecteds {
+  checkIfDuplicate = (array) => {
+    return array.length !== new Set(array).size;
+  };
+
+  verifyNumbers = (cart, allTypesOfGames) => {
+    const allIdsBD = allTypesOfGames.map((game) => game.id);
+
+    const equalsNumbers = cart.filter((element) => {
+      return this.checkIfDuplicate(element.numbers_selecteds.split(","));
     });
 
-    //verifica se existem todos os tipos de jogos no banco de dados,
-    //verifica se existe dentro algo dentro do array de numeros repetidos
-    //e filtra todos os jogos que não satisfazem ambas as regras
-    const gamesNotRegistered = cart.filter((element, index) => {
-      return (
-        !allTypesOfGames.includes(element.type) ||
-        equalsNumbers[index].length !== 0
-      );
+    let gamesInvalited = [];
+
+    //separa todos os jogos válidos baseados em numeros não repetidos e id igual ao do banco
+    allIdsBD.forEach((game, index) => {
+      cart.forEach((bet) => {
+        if (
+          (!allIdsBD.includes(bet.id) || equalsNumbers.includes(bet)) &&
+          !gamesInvalited.includes(bet)
+        ) {
+          gamesInvalited.push(bet);
+        }
+      });
     });
 
-    return gamesNotRegistered;
-  }
+    return gamesInvalited;
+  };
 }
 
-module.exports = verifyNumbersSelecteds;
+module.exports = VerifyNumbersSelecteds;
